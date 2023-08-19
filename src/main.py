@@ -4,6 +4,7 @@ from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.storage import FSMContext
+from aiogram.types.web_app_info import WebAppInfo
 
 TOKEN = 'is hidden'
 
@@ -54,5 +55,16 @@ async def get_city(message: Message, state: FSMContext):
     await state.update_data(data)
     await message.answer(text=f'Успешно!\n{data}')
     await state.reset_state()
+
+@dp.message_handler(commands='start')
+async def start_web_app(message=Message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(types.KeyboardButton(text='Открыть страницу репозитория', web_app=WebAppInfo(url='https://github.com/AndreyVTkachenko/Telegram_bot/tree/main'))) # Вставляем ссылку на анкету, в которой запрашивается ФИО, город, время.
+    await message.answer(text='Жми кнопку', reply_markup=markup)
+
+@dp.message_handler(content_types=['web_app_data'])
+async def get_data_from_web(message=Message):
+    print(message.web_app_data.data, type(message.web_app_data.data))
+    await message.answer(message.web_app_data.data)
 
 executor.start_polling(dispatcher=dp)
